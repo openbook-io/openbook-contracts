@@ -1,7 +1,7 @@
 {
   "name": "openbook-contracts",
   "version": "1.0.0",
-  "author": "AslanLin",
+  "author": "Aslan Lin",
   "license": "ISC",
   "description": "Security Token",
   "main": "truffle-config.js",
