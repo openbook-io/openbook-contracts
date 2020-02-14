@@ -1,4 +1,4 @@
-pragma solidity 0.5.4;
+pragma solidity 0.5.16;
 
 import "./libs/MinterRole.sol";
 import "./ERC1400/IERC1400.sol";
