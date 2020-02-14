@@ -110,15 +110,6 @@ contract ERC1400 is IERC1400, ERC777, MinterRole {
 
     /**
      * [NOT MANDATORY FOR ERC1400 STANDARD]
-     * @dev Definitely renounce the possibility to control tokens on behalf of tokenHolders.
-     * Once set to false, '_isControllable' can never be set to 'true' again.
-     */
-    function renounceControl() external onlyOwner {
-        _isControllable = false;
-    }
-
-    /**
-     * [NOT MANDATORY FOR ERC1400 STANDARD]
      * @dev Definitely renounce the possibility to issue new tokens.
      * Once set to false, '_isIssuable' can never be set to 'true' again.
      */
