@@ -2,7 +2,7 @@ pragma solidity 0.5.16;
 
 import "./ERC1400.sol";
 
-contract CheckpointToken is ERC1400  {
+contract CheckPointToken is ERC1400  {
     using SafeMath for uint256;
 
     /// @dev Checkpoint is the fundamental unit for our internal accounting
