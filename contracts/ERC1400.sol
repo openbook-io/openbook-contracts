@@ -51,7 +51,6 @@ contract ERC1400 is IERC1400, ERC777, MinterRole {
     public
     ERC777(name, symbol, granularity, controllers, certificateSigner)
     {
-        setInterfaceImplementation("ERC1400Token", address(this));
         _isControllable = true;
         _isIssuable = true;
     }
