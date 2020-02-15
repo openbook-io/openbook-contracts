@@ -9,7 +9,15 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:OPENBOOK": "solcpiler -i './contracts/OpenBookToken.sol' --solc-version=\"v0.5.16+commit.9c3226ce\" --output-artifacts-dir artifacts --insert-file-names imports",
+    "clean": "rm -rf artifacts",
+    "coverage": "solidity-coverage",
+    "console": "truffle console",
+    "truffle": "truffle",
+    "truffle:compile": "truffle compile",
+    "truffle:migrate": "truffle migrate",
+    "truffle:test": "truffle test",
+    "remix": "python -mwebbrowser http://localhost:8080 && ./node_modules/remix-ide/bin/remix-ide"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
