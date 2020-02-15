@@ -1,6 +1,5 @@
 pragma solidity 0.5.16;
 
-import "./libs/MinterRole.sol";
 import "./ERC1400/IERC1400.sol";
 import "./ERC777.sol";
 
@@ -8,7 +7,7 @@ import "./ERC777.sol";
  * @title ERC1400
  * @dev ERC1400 logic
  */
-contract ERC1400 is IERC1400, ERC777, MinterRole {
+contract ERC1400 is IERC1400, ERC777 {
 
     struct Doc {
         string docURI;

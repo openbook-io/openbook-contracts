@@ -45,7 +45,7 @@ contract CheckpointToken is ERC1400  {
      * @param blockNumber The block number we want to query for the total supply
      * @return A uint256 specifying the total number of tokens at a given block
      */
-    function totalSupplyAt(uint256 blockNumber) external returns (uint256) {
+    function totalSupplyAt(uint256 blockNumber) external view returns (uint256) {
         return _balanceAtBlock(tokensTotal, blockNumber);
     }
 
@@ -56,7 +56,7 @@ contract CheckpointToken is ERC1400  {
      * @param blockNumber The block number we want to query for the balance.
      * @return An uint256 representing the amount owned by the passed address.
      */
-    function balanceAt(address owner, uint256 blockNumber) external returns (uint256) {
+    function balanceAt(address owner, uint256 blockNumber) external view returns (uint256) {
         return _balanceAtBlock(tokenBalances[owner], blockNumber);
     }
 
@@ -127,7 +127,7 @@ contract CheckpointToken is ERC1400  {
 
     /****************************************** CheckPoint INTERNAL FUNCTIONS *************************************/
 
-    function _balanceAtBlock(Checkpoint[] storage checkpoints, uint256 blockNumber) internal returns (
+    function _balanceAtBlock(Checkpoint[] storage checkpoints, uint256 blockNumber) internal view returns (
         uint256 balance
     ) {
         uint256 currentBlockNumber;
