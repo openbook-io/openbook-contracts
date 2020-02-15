@@ -36,10 +36,8 @@ contract OpenBookToken is CheckPointToken, MinterRole {
     external
     onlyMinter
     issuableToken
-    isValidCertificate(data, 0x67c84919)
+    isValidCertificate(data, 0xbb3acde9)
     {
-        // Sign [0x67c84919] should be regenerated.
-
         _issue(msg.sender, tokenHolder, value, data, "");
     }
 }
