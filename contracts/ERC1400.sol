@@ -21,14 +21,6 @@ contract ERC1400 is IERC1400, ERC777 {
     bool internal _isIssuable;
 
     /**
-     * @dev Modifier to verify if token is issuable.
-     */
-    modifier issuableToken() {
-        require(_isIssuable, "A8, Transfer Blocked - Token restriction");
-        _;
-    }
-
-    /**
      * [ERC1400 CONSTRUCTOR]
      * @dev Initialize ERC1400 + register
      * the contract implementation in ERC820Registry.

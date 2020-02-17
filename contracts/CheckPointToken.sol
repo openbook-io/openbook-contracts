@@ -1,9 +1,9 @@
 pragma solidity 0.5.16;
 
 import "./ERC1400.sol";
+import "./CheckPointToken/ICheckPointToken.sol";
 
-contract CheckPointToken is ERC1400  {
-    using SafeMath for uint256;
+contract CheckPointToken is ICheckPointToken, ERC1400  {
 
     /// @dev Checkpoint is the fundamental unit for our internal accounting
     /// (who owns what, and at what moment in time)
@@ -40,6 +40,8 @@ contract CheckPointToken is ERC1400  {
     ERC1400(name, symbol, granularity, controllers, certificateSigner)
     {}
 
+    /**************************** EXTERNAL FUNCTIONS *************************************/
+
     /**
      * @dev total number of tokens in existence at the given block
      * @param blockNumber The block number we want to query for the total supply
@@ -60,72 +62,7 @@ contract CheckPointToken is ERC1400  {
         return _balanceAtBlock(tokenBalances[owner], blockNumber);
     }
 
-
-   /************************************* OVERRIDES ERC777 METHODS ****************************************/
-
-   /**
-    * [OVERRIDES ERC777 METHOD]
-    * @dev Perform the transfer of tokens.
-    * @param operator The address performing the transfer.
-    * @param from Token holder.
-    * @param to Token recipient.
-    * @param value Number of tokens to transfer.
-    * @param data Information attached to the transfer.
-    * @param operatorData Information attached to the transfer by the operator (if any).
-    * @param preventLocking 'true' if you want this function to throw when tokens are sent to a contract not
-    * implementing 'erc777tokenHolder'.
-    * ERC777 native transfer functions MUST set this parameter to 'true', and backwards compatible ERC20 transfer
-    * functions SHOULD set this parameter to 'false'.
-    */
-   function _transferWithData(
-        address operator,
-        address from,
-        address to,
-        uint256 value,
-        bytes memory data,
-        bytes memory operatorData,
-        bool preventLocking
-    )
-    internal
-    {
-        uint256 fromBalance = _balances[from];
-        uint256 toBalance = _balances[to];
-
-        _setCheckpoint(tokenBalances[from], fromBalance.sub(value));
-        _setCheckpoint(tokenBalances[to], toBalance.add(value));
-
-        ERC777._transferWithData(operator, from, to, value, data, operatorData, preventLocking);
-    }
-
-    /**
-     * [OVERRIDES ERC777 METHOD]
-     * @dev Perform the issuance of tokens.
-     * @param operator Address which triggered the issuance.
-     * @param to Token recipient.
-     * @param value Number of tokens issued.
-     * @param data Information attached to the issuance, and intended for the recipient (to).
-     * @param operatorData Information attached to the issuance by the operator (if any).
-     */
-    function _issue(
-        address operator,
-        address to,
-        uint256 value,
-        bytes memory data,
-        bytes memory operatorData
-    )
-    internal nonReentrant
-    {
-        uint256 blackHoleBalance = _balances[address(0)];
-        uint256 totalSupplyNow = _totalSupply;
-
-        _setCheckpoint(tokenBalances[address(0)], blackHoleBalance.add(value));
-        _setCheckpoint(tokensTotal, totalSupplyNow.add(value));
-
-        ERC777._issue(operator, to, value, data, operatorData);
-    }
-
-
-    /****************************************** CheckPoint INTERNAL FUNCTIONS *************************************/
+    /**************************** INTERNAL FUNCTIONS *************************************/
 
     function _balanceAtBlock(Checkpoint[] storage checkpoints, uint256 blockNumber) internal view returns (
         uint256 balance
@@ -172,4 +109,34 @@ contract CheckPointToken is ERC1400  {
 
         return (checkpoints[min].blockNumber, checkpoints[min].value);
     }
+
+    /************************************* OVERRIDES ERC777 METHODS ****************************************/
+
+    /**
+     * [OVERRIDES ERC777 METHOD]
+     * @dev Perform the issuance of tokens.
+     * @param operator Address which triggered the issuance.
+     * @param to Token recipient.
+     * @param value Number of tokens issued.
+     * @param data Information attached to the issuance, and intended for the recipient (to).
+     * @param operatorData Information attached to the issuance by the operator (if any).
+     */
+    function _issue(
+        address operator,
+        address to,
+        uint256 value,
+        bytes memory data,
+        bytes memory operatorData
+    )
+    internal nonReentrant
+    {
+        uint256 blackHoleBalance = _balances[address(0)];
+        uint256 totalSupplyNow = _totalSupply;
+
+        _setCheckpoint(tokenBalances[address(0)], blackHoleBalance.add(value));
+        _setCheckpoint(tokensTotal, totalSupplyNow.add(value));
+
+        ERC777._issue(operator, to, value, data, operatorData);
+    }
+
 }
