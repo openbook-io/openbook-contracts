@@ -12,7 +12,6 @@ contract OpenBookToken is CheckPointToken, MinterRole, DateTime {
     uint16 _currentYearIssuedAt;
 
     mapping (uint16 => uint) public yearTotalSupplies;
-    mapping (address => bool) _whitelisted;
 
     /**
     * @dev Modifier to verify if token is issuable.
@@ -22,7 +21,6 @@ contract OpenBookToken is CheckPointToken, MinterRole, DateTime {
         _;
     }
 
-    event Whitelisted(address indexed who, bool authorized);
 
     /**
      * [OpenBookToken CONSTRUCTOR]
@@ -45,21 +43,6 @@ contract OpenBookToken is CheckPointToken, MinterRole, DateTime {
     public
     CheckPointToken(name, symbol, granularity, controllers, certificateSigner)
     {}
-
-    /**************************  EXTERNAL FUNCTIONS ***************************/
-
-    function isWhitelisted(address who) external view returns(bool) {
-        return _whitelisted[who];
-    }
-
-    /**
-     * @dev Set whitelisted status for a tokenHolder.
-     * @param tokenHolder Address to add/remove from whitelist.
-     * @param authorized 'true' if tokenHolder shall be added to whitelist, 'false' if not.
-     */
-    function setWhitelisted(address tokenHolder, bool authorized) external onlyOwner {
-        _setWhitelisted(tokenHolder, authorized);
-    }
 
     /**
     * @dev Issue tokens.
@@ -97,60 +80,5 @@ contract OpenBookToken is CheckPointToken, MinterRole, DateTime {
 
         // save current year issued
         _currentYearIssuedAt = currentYear;
-    }
-
-    /**************************  INTERNAL FUNCTIONS ***************************/
-
-    /**
-     * [INTERNAL]
-     * @dev Set whitelisted status for a tokenHolder.
-     * @param tokenHolder Address to add/remove from whitelist.
-     * @param authorized 'true' if tokenHolder shall be added to whitelist, 'false' if not.
-     */
-    function _setWhitelisted(address tokenHolder, bool authorized) internal {
-        require(tokenHolder != address(0), "Action Blocked - Not a valid address");
-        if(_whitelisted[tokenHolder] != authorized) {
-            _whitelisted[tokenHolder] = authorized;
-
-            emit Whitelisted(tokenHolder, authorized);
-        }
-    }
-
-    /************************* OVERRIDES ERC777 METHODS *****************************/
-
-    /**
-     * [OVERRIDES ERC777 METHOD]
-     * @dev Perform the transfer of tokens.
-     * @param operator The address performing the transfer.
-     * @param from Token holder.
-     * @param to Token recipient.
-     * @param value Number of tokens to transfer.
-     * @param data Information attached to the transfer.
-     * @param operatorData Information attached to the transfer by the operator (if any).
-     * @param preventLocking 'true' if you want this function to throw when tokens are sent to a contract not
-     * implementing 'erc777tokenHolder'.
-     * ERC777 native transfer functions MUST set this parameter to 'true', and backwards compatible ERC20 transfer
-     * functions SHOULD set this parameter to 'false'.
-     */
-    function _transferWithData(
-        address operator,
-        address from,
-        address to,
-        uint256 value,
-        bytes memory data,
-        bytes memory operatorData,
-        bool preventLocking
-    )
-    internal
-    {
-        uint256 fromBalance = _balances[from];
-        uint256 toBalance = _balances[to];
-
-        _setCheckpoint(tokenBalances[from], fromBalance.sub(value));
-        _setCheckpoint(tokenBalances[to], toBalance.add(value));
-
-        require(_whitelisted[to], "A3: Transfer Blocked - Recipient not whitelisted");
-
-        ERC777._transferWithData(operator, from, to, value, data, operatorData, preventLocking);
     }
 }

@@ -1,9 +1,9 @@
 pragma solidity 0.5.16;
 
-import "./ERC1400.sol";
+import "./ERC1400ERC20.sol";
 import "./CheckPointToken/ICheckPointToken.sol";
 
-contract CheckPointToken is ICheckPointToken, ERC1400  {
+contract CheckPointToken is ICheckPointToken, ERC1400ERC20  {
 
     /// @dev Checkpoint is the fundamental unit for our internal accounting
     /// (who owns what, and at what moment in time)
@@ -37,7 +37,7 @@ contract CheckPointToken is ICheckPointToken, ERC1400  {
         address certificateSigner
     )
     public
-    ERC1400(name, symbol, granularity, controllers, certificateSigner)
+    ERC1400ERC20(name, symbol, granularity, controllers, certificateSigner)
     {}
 
     /**************************** EXTERNAL FUNCTIONS *************************************/
@@ -110,7 +110,7 @@ contract CheckPointToken is ICheckPointToken, ERC1400  {
         return (checkpoints[min].blockNumber, checkpoints[min].value);
     }
 
-    /************************************* OVERRIDES ERC777 METHODS ****************************************/
+    /****************************** OVERRIDES ERC777 METHODS ************************************/
 
     /**
      * [OVERRIDES ERC777 METHOD]
@@ -137,6 +137,43 @@ contract CheckPointToken is ICheckPointToken, ERC1400  {
         _setCheckpoint(tokensTotal, totalSupplyNow.add(value));
 
         ERC777._issue(operator, to, value, data, operatorData);
+
+        emit Transfer(address(0), to, value); // ERC20 backwards compatibility
     }
 
+    /**
+     * [OVERRIDES ERC777 METHOD]
+     * @dev Perform the transfer of tokens.
+     * @param operator The address performing the transfer.
+     * @param from Token holder.
+     * @param to Token recipient.
+     * @param value Number of tokens to transfer.
+     * @param data Information attached to the transfer.
+     * @param operatorData Information attached to the transfer by the operator (if any).
+     * @param preventLocking 'true' if you want this function to throw when tokens are sent to a contract not
+     * implementing 'erc777tokenHolder'.
+     * ERC777 native transfer functions MUST set this parameter to 'true', and backwards compatible ERC20 transfer
+     * functions SHOULD set this parameter to 'false'.
+     */
+    function _transferWithData(
+        address operator,
+        address from,
+        address to,
+        uint256 value,
+        bytes memory data,
+        bytes memory operatorData,
+        bool preventLocking
+    )
+    internal
+    {
+        uint256 fromBalance = _balances[from];
+        uint256 toBalance = _balances[to];
+
+        _setCheckpoint(tokenBalances[from], fromBalance.sub(value));
+        _setCheckpoint(tokenBalances[to], toBalance.add(value));
+
+        ERC777._transferWithData(operator, from, to, value, data, operatorData, preventLocking);
+
+        emit Transfer(from, to, value);
+    }
 }
