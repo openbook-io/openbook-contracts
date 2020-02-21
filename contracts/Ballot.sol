@@ -30,7 +30,6 @@ contract Ballot is IBallot {
     uint private countWeight = 0;
     uint private totalWeight = 0;
     bool private finalResult = false;
-    uint public totalVoter = 0;
     uint public totalVote = 0;
 
     address public ballotOfficialAddress;
