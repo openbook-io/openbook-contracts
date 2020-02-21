@@ -5,6 +5,10 @@ import "./Certificate/CertificateController.sol";
 import "./libs/Ownable.sol";
 import "./libs/SafeMath.sol";
 
+/**
+ * @title Dividend
+ * @dev Dividend with CertificateController
+ */
 contract Dividend is CertificateController, Ownable {
     using SafeMath for uint256;
 
@@ -34,14 +38,31 @@ contract Dividend is CertificateController, Ownable {
         _;
     }
 
-    event Deposited(address indexed operator, uint amount);
-    event Claimed(address indexed operator, uint amount);
+    event Deposited(address indexed operator, uint256 amount);
+    event Claimed(address indexed operator, uint256 amount);
 
-    constructor(ICheckPointToken _token) public {
+    /**
+    * [Dividend CONSTRUCTOR]
+    * @dev Initialize Dividend.
+    * @param _token CheckPointToken.
+    * @param _certificateSigner Address of the off-chain service which signs the
+    * conditional ownership certificates required for token transfers, issuance,
+    * redemption (Cf. CertificateController.sol).
+    */
+    constructor(
+        ICheckPointToken _token,
+        address _certificateSigner
+    )
+    public
+    CertificateController(_certificateSigner)
+    {
         token = _token;
         claimable = false;
     }
 
+    /**
+    * payable function to deposit
+    */
     function () payable external {
         deposits[totalDepositCount] = Deposit({
             operator: msg.sender,
@@ -57,43 +78,117 @@ contract Dividend is CertificateController, Ownable {
 
     /**************************** PUBLIC FUNCTIONS *************************************/
 
+    /**
+    * @dev start claim
+    */
     function start() external onlyOwner {
-        claimableCount = totalDepositCount;
+        _setClaimableCount(totalDepositCount);
         claimable = true;
     }
 
+    /**
+    * @dev stop claim
+    */
     function stop() external onlyOwner {
         claimable = false;
     }
 
-    function claim(bytes calldata data) external isClaimable returns(uint) {
+    /**
+    * @dev claim divided
+    * @param data Information attached to the claim, by the claimer. [CONTAINS THE CONDITIONAL OWNERSHIP CERTIFICATE]
+    * @return claimAmount uint
+    */
+    function claim(bytes calldata data)
+    external
+    isClaimable
+    isValidCertificate(data, 0xc63ff8dd)
+    returns (uint256)
+    {
         return _claim(msg.sender);
     }
 
-    function getClaimAmount(address _operator) internal returns(uint) {
+    /**************************** OPTIONAL FUNCTIONS *************************************/
+
+    /**
+    * @dev get claim amount
+    * @dev _operator Address
+    * @return claimAmount uint256
+    */
+    function getClaimAmount(address _operator) external view returns(uint256) {
         return _getClaimAmount(_operator);
+    }
+
+    /**
+    * @dev set claimable count
+    * @param _count uint256
+    * @return true
+    */
+    function setClaimableCount(uint256 _count) external onlyOwner returns(bool) {
+        return _setClaimableCount(_count);
     }
 
     /**************************** INTERNAL FUNCTIONS *************************************/
 
-    function _claim (address _operator) internal returns(uint) {
-        uint claimAmount = _getClaimAmount(_operator);
-
-        require(claimAmount > 0, "Action Blocked - Already Claimed");
-        require(address(this).balance >= claimAmount, "Action Blocked - Insufficient Balance");
-
-        address(this).transfer(claimAmount);
-
-        _setClaimLog(_operator);
-
-        emit Claimed(_operator, claimAmount);
-
-        return claimAmount;
+    /**
+    * [INTERNAL]
+    * @dev set claimable count
+    * @dev _count uint256
+    * @return true
+    */
+    function _setClaimableCount(uint256 _count) internal returns(bool) {
+        require(totalDepositCount >= _count && _count > claimableCount, "Action Blocked - Invalid Count");
+        claimableCount = _count;
+        return true;
     }
 
-    function _getClaimAmount(address _operator) internal returns(uint) {
-        uint claimAmount;
-        uint claimedCount = claims[_operator].claimedCount;
+    /**
+    * [INTERNAL]
+    * @dev claim
+    * @param _operator address
+    * @return claimAmount uint256
+    */
+    function _claim (address _operator) internal returns(uint256) {
+        require(_operator != address(0), "Transfer Blocked - Operator not eligible");
+
+        uint256 totalClaimAmount;
+        uint256 claimedCount = claims[_operator].claimedCount;
+        uint256[] memory claimAmountsAt;
+        uint256 claimAmountAt;
+
+        require(claimedCount < claimableCount, "Action Blocked - Already Claimed");
+
+        for (uint i = claimedCount; i < claimableCount; i++){
+            claimAmountAt = _getClaimAmountAt(_operator, i + 1);
+            claimAmountsAt[i - claimedCount] = claimAmountAt;
+            totalClaimAmount.add(claimAmountAt);
+        }
+
+        require(totalClaimAmount > 0, "Action Blocked - Zero Amount");
+        require(address(this).balance >= totalClaimAmount, "Action Blocked - Insufficient Balance");
+
+        address(this).transfer(totalClaimAmount);
+
+        for (uint j = 0; j < (claimableCount - claimedCount) ; j++) {
+            deposits[j].claimedAmount.add(claimAmountsAt[j]);
+            claims[_operator].claimedAmount.add(claimAmountsAt[j]);
+        }
+
+        claims[_operator].claimedCount = claimableCount;
+
+        emit Claimed(_operator, totalClaimAmount);
+
+        return totalClaimAmount;
+    }
+
+    /**
+    * [INTERNAL]
+    * @dev get claim amount
+    * @dev _operator Address
+    * @return claimAmount uint256
+    */
+    function _getClaimAmount(address _operator) internal view returns(uint256) {
+        uint256 claimAmount;
+        uint256 claimedCount = claims[_operator].claimedCount;
 
         if(claimedCount >= claimableCount) {
             return 0;
@@ -106,10 +201,17 @@ contract Dividend is CertificateController, Ownable {
         return claimAmount;
     }
 
-    function _getClaimAmountAt(address _operator, uint _count) internal returns(uint) {
+    /**
+    * [INTERNAL]
+    * @dev get claim amount at count
+    * @dev _operator Address
+    * @dev _count uint256
+    * @return claimAmount uint256
+    */
+    function _getClaimAmountAt(address _operator, uint256 _count) internal view returns(uint256) {
 
-        uint totalSupplyAt;
-        uint balanceAt;
+        uint256 totalSupplyAt;
+        uint256 balanceAt;
 
         totalSupplyAt = token.totalSupplyAt(deposits[_count].blockNumber);
         balanceAt = token.balanceAt(_operator, deposits[_count].blockNumber);
@@ -117,19 +219,12 @@ contract Dividend is CertificateController, Ownable {
         return deposits[_count].depositedAmount.mul(balanceAt.div(totalSupplyAt));
     }
 
-    function _setClaimLog(address _operator) internal returns(bool) {
-
-        uint claimedCount = claims[_operator].claimedCount;
-        uint claimAmountAt;
-
-        for (uint i = claimedCount; i <= claimableCount; i++) {
-            claimAmountAt = _getClaimAmountAt(_operator, i + 1);
-            deposits[i].claimedAmount.add(claimAmountAt);
-            claims[_operator].claimedAmount.add(claimAmountAt);
-        }
-
-        claims[_operator].claimedCount = claimableCount;
-
-        return true;
+    /**
+    * @dev Add a certificate signer for the token.
+    * @param operator Address to set as a certificate signer.
+    * @param authorized 'true' if operator shall be accepted as certificate signer, 'false' if not.
+    */
+    function setCertificateSigner(address operator, bool authorized) external onlyOwner {
+        _setCertificateSigner(operator, authorized);
     }
 }

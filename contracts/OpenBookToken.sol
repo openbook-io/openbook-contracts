@@ -4,6 +4,10 @@ import "./libs/MinterRole.sol";
 import "./libs/DateTime.sol";
 import "./CheckPointToken.sol";
 
+/**
+ * @title OpenBookToken
+ * @dev OpenBookToken with CheckPointToken
+ */
 contract OpenBookToken is CheckPointToken, MinterRole, DateTime {
 
     uint public maximumTotalSupply = 100000000;
