@@ -160,7 +160,7 @@ contract Dividend is CertificateController, Ownable {
         for (uint i = claimedCount; i < claimableCount; i++){
             claimAmountAt = _getClaimAmountAt(_operator, i + 1);
             claimAmountsAt[i - claimedCount] = claimAmountAt;
-            totalClaimAmount.add(claimAmountAt);
+            totalClaimAmount = totalClaimAmount.add(claimAmountAt);
         }
 
         require(totalClaimAmount > 0, "Action Blocked - Zero Amount");
@@ -169,8 +169,8 @@ contract Dividend is CertificateController, Ownable {
         address(this).transfer(totalClaimAmount);
 
         for (uint j = 0; j < (claimableCount - claimedCount) ; j++) {
-            deposits[j].claimedAmount.add(claimAmountsAt[j]);
-            claims[_operator].claimedAmount.add(claimAmountsAt[j]);
+            deposits[j].claimedAmount = deposits[j].claimedAmount.add(claimAmountsAt[j]);
+            claims[_operator].claimedAmount = claims[_operator].claimedAmount.add(claimAmountsAt[j]);
         }
 
         claims[_operator].claimedCount = claimableCount;
@@ -195,7 +195,7 @@ contract Dividend is CertificateController, Ownable {
         }
 
         for (uint i = claimedCount; i < claimableCount; i++){
-            claimAmount.add(_getClaimAmountAt(_operator, i + 1));
+            claimAmount = claimAmount.add(_getClaimAmountAt(_operator, i + 1));
         }
 
         return claimAmount;

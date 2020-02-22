@@ -147,10 +147,10 @@ contract Ballot is IBallot {
             v.choice = _choice;
             v.weight = balanceAt;
             if (_choice){
-                countWeight.add(balanceAt);
+                countWeight = countWeight.add(balanceAt);
             }
             votes[totalVote] = v;
-            totalWeight.add(balanceAt);
+            totalWeight = totalWeight.add(balanceAt);
             totalVote++;
             found = true;
         }
