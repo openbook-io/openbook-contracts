@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-import "./CheckPointToken/ICheckPointToken.sol";
+import "./CheckPoint/ICheckPoint.sol";
 import "./Ballot/IBallot.sol";
 import "./libs/SafeMath.sol";
 
@@ -37,7 +37,7 @@ contract Ballot is IBallot {
 
     uint public ballotBlockNumber;
     Doc private ballotOfficialDoc;
-    ICheckPointToken public ballotToken;
+    ICheckPoint public ballotToken;
 
     mapping(uint => vote) private votes;
     mapping(address => voter) public voterRegister;
@@ -71,14 +71,14 @@ contract Ballot is IBallot {
     * @param _docProposal string Proposal
     * @param _docURI string Doc URI
     * @param _docHASH byte32 byte32
-    * @param _token ICheckPointToken OpenBook Token
+    * @param _token ICheckPoint OpenBook Token
     */
     constructor(
         string memory _ballotOfficialName,
         string memory _docProposal,
         string memory _docURI,
         bytes32 _docHASH,
-        ICheckPointToken _token
+        ICheckPoint _token
     )
     public
     {

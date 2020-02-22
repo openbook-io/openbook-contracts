@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-import "./CheckPointToken/ICheckPointToken.sol";
+import "./CheckPoint/ICheckPoint.sol";
 import "./Certificate/CertificateController.sol";
 import "./libs/Ownable.sol";
 import "./libs/SafeMath.sol";
@@ -24,7 +24,7 @@ contract Dividend is CertificateController, Ownable {
         uint claimedAmount;
     }
 
-    ICheckPointToken token;
+    ICheckPoint token;
 
     mapping(uint => Deposit) deposits; // depositCount => Deposit
     mapping(address => Claim) claims; // address => Claim
@@ -44,13 +44,13 @@ contract Dividend is CertificateController, Ownable {
     /**
     * [Dividend CONSTRUCTOR]
     * @dev Initialize Dividend.
-    * @param _token CheckPointToken.
+    * @param _token CheckPoint.
     * @param _certificateSigner Address of the off-chain service which signs the
     * conditional ownership certificates required for token transfers, issuance,
     * redemption (Cf. CertificateController.sol).
     */
     constructor(
-        ICheckPointToken _token,
+        ICheckPoint _token,
         address _certificateSigner
     )
     public
@@ -218,6 +218,8 @@ contract Dividend is CertificateController, Ownable {
 
         return deposits[_count].depositedAmount.mul(balanceAt.div(totalSupplyAt));
     }
+
+    /**************************** Certification Controller *************************************/
 
     /**
     * @dev Add a certificate signer for the token.

@@ -2,13 +2,13 @@ pragma solidity 0.5.16;
 
 import "./libs/MinterRole.sol";
 import "./libs/DateTime.sol";
-import "./CheckPointToken.sol";
+import "./CheckPoint.sol";
 
 /**
  * @title OpenBookToken
  * @dev OpenBookToken with CheckPointToken
  */
-contract OpenBookToken is CheckPointToken, MinterRole, DateTime {
+contract OpenBookToken is CheckPoint, MinterRole, DateTime {
 
     uint public maximumTotalSupply = 100000000;
     uint8 public issuableRate = 10;
@@ -45,7 +45,7 @@ contract OpenBookToken is CheckPointToken, MinterRole, DateTime {
         address certificateSigner
     )
     public
-    CheckPointToken(name, symbol, granularity, controllers, certificateSigner)
+    CheckPoint(name, symbol, granularity, controllers, certificateSigner)
     {}
 
     /**

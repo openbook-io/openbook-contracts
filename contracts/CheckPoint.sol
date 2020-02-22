@@ -1,9 +1,9 @@
 pragma solidity 0.5.16;
 
 import "./ERC1400ERC20.sol";
-import "./CheckPointToken/ICheckPointToken.sol";
+import "./CheckPoint/ICheckPoint.sol";
 
-contract CheckPointToken is ICheckPointToken, ERC1400ERC20  {
+contract CheckPoint is ICheckPoint, ERC1400ERC20  {
 
     /// @dev Checkpoint is the fundamental unit for our internal accounting
     /// (who owns what, and at what moment in time)
@@ -20,7 +20,7 @@ contract CheckPointToken is ICheckPointToken, ERC1400ERC20  {
 
     /**
      * [CheckpointToken CONSTRUCTOR]
-     * @dev Initialize CheckpointToken.
+     * @dev Initialize Checkpoint.
      * @param name Name of the token.
      * @param symbol Symbol of the token.
      * @param granularity Granularity of the token.

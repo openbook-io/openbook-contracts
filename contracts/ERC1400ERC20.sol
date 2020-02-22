@@ -1,7 +1,6 @@
 pragma solidity 0.5.16;
 
 import "./ERC20/IERC20.sol";
-
 import "./ERC1400.sol";
 
 

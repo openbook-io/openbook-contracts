@@ -15,6 +15,7 @@ module.exports = async function (deployer, network, accounts) {
     }
 
     await deployer.deploy(TOKEN, 'OpenBook', 'OBK', 1, [controller], CERTIFICATE_SIGNER);
+
     const token = await TOKEN.deployed();
     console.log("Token address:", token.address);
 };
