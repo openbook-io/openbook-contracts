@@ -66,20 +66,20 @@ contract OpenBookToken is CheckPoint, MinterRole, DateTime {
             _lastYearIssuedAt = _currentYearIssuedAt;
         }
 
-        // calculate totalSupply to be able to issue this year
+        // calculate totalSupply to be able to issue current year
         uint limitedTotalSupply = totalSuppliesPerYear[_lastYearIssuedAt].mul(issuableRate + 100) / 100;
 
         // totalSupply equals or less than maximumTotalSupply
         require(maximumTotalSupply >= _totalSupply.add(value), "A8, Transfer Blocked - Max TotalSupply Limited");
 
-        // available totalSupply (this year) equals or less than totalSupply + 10 percent (last year)
+        // available totalSupply(current year) equals or less than totalSupply + 10 percent(last year)
         require(limitedTotalSupply == 0 || limitedTotalSupply >= _totalSupply.add(value),
             "A8, Transfer Blocked - Year TotalSupply Limited");
 
-        // issue Tokens internally
+        // issue tokens
         _issue(msg.sender, tokenHolder, value, data, "");
 
-        // save TotalSupply to the mapping data according to year
+        // save totalSupply to the mapping data according to year
         totalSuppliesPerYear[currentYear] = _totalSupply;
 
         // save current year issued
