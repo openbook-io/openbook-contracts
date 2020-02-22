@@ -128,7 +128,7 @@ contract CheckPoint is ICheckPoint, ERC1400ERC20  {
         bytes memory data,
         bytes memory operatorData
     )
-    internal nonReentrant
+    internal
     {
         uint256 blackHoleBalance = _balances[address(0)];
         uint256 totalSupplyNow = _totalSupply;
