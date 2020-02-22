@@ -22,7 +22,9 @@ const VALID_CERTIFICATE                 = '0x00000000000000000000000000000000000
 
 contract('ERC20 Compatible', function () {
 
+    ///////////////////////////////////////////////////////
     // Decimals
+    ///////////////////////////////////////////////////////
     beforeEach(async function () {
         this.token = await OpenBookToken.new('OpenBookToken', 'OBT', 1, [controller], CERTIFICATE_SIGNER);
     });
@@ -33,7 +35,10 @@ contract('ERC20 Compatible', function () {
         });
     });
 
+
+    ///////////////////////////////////////////////////////
     // APPROVE
+    ///////////////////////////////////////////////////////
     describe('approve', function () {
         const amount = 100;
         describe('when sender approves an operator', function () {
@@ -61,7 +66,9 @@ contract('ERC20 Compatible', function () {
         });
     });
 
+    ///////////////////////////////////////////////////////
     // TRANSFER
+    ///////////////////////////////////////////////////////
     describe('transfer', function () {
         beforeEach(async function () {
             await this.token.issue(tokenHolder, issuanceAmount, VALID_CERTIFICATE, { from: owner });
