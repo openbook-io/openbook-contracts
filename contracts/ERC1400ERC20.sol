@@ -3,7 +3,6 @@ pragma solidity 0.5.16;
 import "./ERC20/IERC20.sol";
 import "./ERC1400.sol";
 
-
 /**
  * @title ERC1400ERC20
  * @dev ERC1400 with ERC20 retrocompatibility
@@ -96,7 +95,7 @@ contract ERC1400ERC20 is IERC20, ERC1400 {
      * @return A boolean that indicates if the operation was successful.
      */
     function transfer(address to, uint256 value) external areWhitelisted(msg.sender, to) returns (bool) {
-        ERC777._transferWithData(msg.sender, msg.sender, to, value, "", "", false);
+        _transferWithData(msg.sender, msg.sender, to, value, "", "", false);
         return true;
     }
 
@@ -118,7 +117,7 @@ contract ERC1400ERC20 is IERC20, ERC1400 {
             _allowed[from][msg.sender] = 0;
         }
 
-        ERC777._transferWithData(msg.sender, from, to, value, "", "", false);
+        _transferWithData(msg.sender, from, to, value, "", "", false);
         return true;
     }
 
