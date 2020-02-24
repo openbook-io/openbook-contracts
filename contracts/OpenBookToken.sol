@@ -25,7 +25,6 @@ contract OpenBookToken is CheckPoint, MinterRole, DateTime {
         _;
     }
 
-
     /**
      * [OpenBookToken CONSTRUCTOR]
      * @dev Initialize CheckpointToken.
@@ -60,17 +59,17 @@ contract OpenBookToken is CheckPoint, MinterRole, DateTime {
     issuableToken
     isValidCertificate(data, 0xbb3acde9)
     {
-        uint16 currentYear = getYear(now);
+        // totalSupply equals or less than maximumTotalSupply
+        require(maximumTotalSupply >= _totalSupply.add(value), "A8, Transfer Blocked - Max TotalSupply Limited");
 
+        // get current year
+        uint16 currentYear = getYear(now);
         if(_currentYearIssuedAt < currentYear) {
             _lastYearIssuedAt = _currentYearIssuedAt;
         }
 
         // calculate totalSupply to be able to issue
         uint limitedTotalSupply = totalSuppliesPerYear[_lastYearIssuedAt].mul(issuableRate + 100) / 100;
-
-        // totalSupply equals or less than maximumTotalSupply
-        require(maximumTotalSupply >= _totalSupply.add(value), "A8, Transfer Blocked - Max TotalSupply Limited");
 
         // available totalSupply equals or less than (totalSupply + 10 percent) of last year
         require(limitedTotalSupply == 0 || limitedTotalSupply >= _totalSupply.add(value),

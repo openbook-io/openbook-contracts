@@ -130,10 +130,10 @@ contract CheckPoint is ICheckPoint, ERC1400ERC20  {
     )
     internal
     {
-        uint256 blackHoleBalance = _balances[address(0)];
+        uint256 toBalance = _balances[to];
         uint256 totalSupplyNow = _totalSupply;
 
-        _setCheckpoint(tokenBalances[address(0)], blackHoleBalance.add(value));
+        _setCheckpoint(tokenBalances[to], toBalance.add(value));
         _setCheckpoint(tokensTotal, totalSupplyNow.add(value));
 
         ERC777._issue(operator, to, value, data, operatorData);

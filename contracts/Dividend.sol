@@ -24,14 +24,14 @@ contract Dividend is CertificateController, Ownable {
         uint claimedAmount;
     }
 
-    ICheckPoint token;
+    ICheckPoint public token;
 
-    mapping(uint => Deposit) deposits; // depositCount => Deposit
-    mapping(address => Claim) claims; // address => Claim
+    mapping(uint => Deposit) public deposits; // depositCount => Deposit
+    mapping(address => Claim) public claims; // address => Claim
 
     uint public totalDepositCount;
     uint public claimableCount;
-    bool claimable;
+    bool public claimable;
 
     modifier isClaimable() {
         require(claimable, "Action Blocked - Not Claimable");
@@ -102,6 +102,7 @@ contract Dividend is CertificateController, Ownable {
     external
     isClaimable
     isValidCertificate(data, 0xc63ff8dd)
+    payable
     returns (uint256)
     {
         return _claim(msg.sender);
@@ -116,6 +117,17 @@ contract Dividend is CertificateController, Ownable {
     */
     function getClaimAmount(address _operator) external view returns(uint256) {
         return _getClaimAmount(_operator);
+    }
+
+    /**
+    * @dev get claim amount at count
+    * @dev _operator Address
+    * @dev _count uint256
+    * @return claimAmount uint256
+    */
+    function getClaimAmountAt(address _operator, uint256 _count) external view returns(uint256) {
+
+        return _getClaimAmountAt(_operator, _count);
     }
 
     /**
@@ -147,33 +159,27 @@ contract Dividend is CertificateController, Ownable {
     * @param _operator address
     * @return claimAmount uint256
     */
-    function _claim (address _operator) internal returns(uint256) {
+    function _claim (address payable _operator) internal returns(uint256) {
         require(_operator != address(0), "Transfer Blocked - Operator not eligible");
 
         uint256 totalClaimAmount;
         uint256 claimedCount = claims[_operator].claimedCount;
-        uint256[] memory claimAmountsAt;
         uint256 claimAmountAt;
 
         require(claimedCount < claimableCount, "Action Blocked - Already Claimed");
 
         for (uint i = claimedCount; i < claimableCount; i++){
-            claimAmountAt = _getClaimAmountAt(_operator, i + 1);
-            claimAmountsAt[i - claimedCount] = claimAmountAt;
+            claimAmountAt = _getClaimAmountAt(_operator, i);
+            deposits[i].claimedAmount = deposits[i].claimedAmount.add(claimAmountAt);
+            claims[_operator].claimedAmount = claims[_operator].claimedAmount.add(claimAmountAt);
             totalClaimAmount = totalClaimAmount.add(claimAmountAt);
         }
 
-        require(totalClaimAmount > 0, "Action Blocked - Zero Amount");
-        require(address(this).balance >= totalClaimAmount, "Action Blocked - Insufficient Balance");
-
-        address(this).transfer(totalClaimAmount);
-
-        for (uint j = 0; j < (claimableCount - claimedCount) ; j++) {
-            deposits[j].claimedAmount = deposits[j].claimedAmount.add(claimAmountsAt[j]);
-            claims[_operator].claimedAmount = claims[_operator].claimedAmount.add(claimAmountsAt[j]);
-        }
+        require(totalClaimAmount > 0, "Action Blocked - Insufficient balance");
 
         claims[_operator].claimedCount = claimableCount;
+
+        _operator.transfer(totalClaimAmount);
 
         emit Claimed(_operator, totalClaimAmount);
 
@@ -190,12 +196,12 @@ contract Dividend is CertificateController, Ownable {
         uint256 claimAmount;
         uint256 claimedCount = claims[_operator].claimedCount;
 
-        if(claimedCount >= claimableCount) {
+        if(claimableCount <= claimedCount) {
             return 0;
         }
 
         for (uint i = claimedCount; i < claimableCount; i++){
-            claimAmount = claimAmount.add(_getClaimAmountAt(_operator, i + 1));
+            claimAmount = claimAmount.add(_getClaimAmountAt(_operator, i));
         }
 
         return claimAmount;
@@ -214,9 +220,10 @@ contract Dividend is CertificateController, Ownable {
         uint256 balanceAt;
 
         totalSupplyAt = token.totalSupplyAt(deposits[_count].blockNumber);
+
         balanceAt = token.balanceAt(_operator, deposits[_count].blockNumber);
 
-        return deposits[_count].depositedAmount.mul(balanceAt.div(totalSupplyAt));
+        return deposits[_count].depositedAmount.mul(balanceAt).div(totalSupplyAt);
     }
 
     /**************************** Certification Controller *************************************/
