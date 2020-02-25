@@ -17,7 +17,7 @@ const ZERO_BYTE                         = '0x';
 const depositAmount                     = web3.utils.toWei('10', 'ether');
 const halfOfDepositAmount               = web3.utils.toWei('5', 'ether');
 
-contract('Dividend Strategy', function () {
+contract('Dividend', function () {
     ///////////////////////////////////////////////////////
     //   Parameters Testing
     ///////////////////////////////////////////////////////

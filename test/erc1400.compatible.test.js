@@ -227,7 +227,7 @@ contract('ERC1400 Compatible', function () {
                     assert.equal(documentURI, doc[0]);
                     assert.equal(documentHash, doc[1]);
                 });
-                it('emits a docuemnt event', async function () {
+                it('emits a documemnt event', async function () {
                     const {logs} = await this.token.setDocument(documentName, documentURI, documentHash, {from: owner});
 
                     assert.equal(logs.length, 1);
