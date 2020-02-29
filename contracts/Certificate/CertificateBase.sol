@@ -5,6 +5,8 @@ contract CertificateBase {
     // Address used by off-chain controller service to sign certificate
     mapping(address => bool) internal _certificateSigners;
     mapping(address => uint256) internal _checkCount;
+    // signature size is 65 bytes (tightly packed v + r + s), but gets padded to 96 bytes
+    uint internal constant SIGNATURE_SIZE = 96;
 
     event Checked(address sender);
 
@@ -27,9 +29,12 @@ contract CertificateBase {
         bytes memory expHex = _extractBytes(_data, 65, 4); // expiration timestamp in Hex;
         uint expUnix = _bytesToUint(expHex);               // expiration timestamp in Unix;
 
+        // params data, first 4 bytes is functionId
+        bytes memory data = _extractBytes(msg.data, 0, (msg.data.length - SIGNATURE_SIZE));
+
         require(expUnix > now, 'Certificate Expired');
 
-        bytes32 txHash = _getSignHash(_getPreSignedHash(_function, address(this), expUnix, _checkCount[msg.sender]));
+        bytes32 txHash = _getSignHash(_getPreSignedHash(_function, data, address(this), expUnix, _checkCount[msg.sender]));
 
         address recovered = _ecrecoverFromSig(txHash, sig);
 
@@ -50,8 +55,8 @@ contract CertificateBase {
     }
 
     function _getPreSignedHash(
-        bytes4 _function, address _address, uint _expiration, uint _nonce) internal pure returns(bytes32) {
-        return keccak256(abi.encodePacked(_function, _address, _expiration, _nonce));
+        bytes4 _function, bytes memory _data, address _address, uint _expiration, uint _nonce) internal pure returns(bytes32) {
+        return keccak256(abi.encodePacked(_function, _data, _address, _expiration, _nonce));
     }
 
     function _getSignHash(bytes32 _hash) internal pure returns (bytes32)
