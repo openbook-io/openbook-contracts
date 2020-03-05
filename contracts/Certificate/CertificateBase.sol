@@ -31,14 +31,14 @@ contract CertificateBase {
 
         // params data, first 4 bytes is functionId
         bytes memory data = _extractBytes(msg.data, 0, (msg.data.length - SIGNATURE_SIZE));
-
-        require(expUnix > now, 'Certificate Expired');
-
         bytes32 txHash = _getSignHash(_getPreSignedHash(_function, data, address(this), expUnix, _checkCount[msg.sender]));
-
         address recovered = _ecrecoverFromSig(txHash, sig);
 
-        return _certificateSigners[recovered];
+        if(_certificateSigners[recovered]) {
+            require(expUnix > now, 'Certificate Expired');
+            return true;
+        }
+        return false;
     }
 
     function _ecrecoverFromSig(bytes32 hash, bytes memory sig) internal pure returns (address recoveredAddress) {
