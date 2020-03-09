@@ -101,7 +101,7 @@ contract Dividend is CertificateController, Ownable {
     function claim(bytes calldata data)
     external
     isClaimable
-    isValidCertificate(data, 0xc63ff8dd)
+    isValidCertificate(data)
     payable
     returns (uint256)
     {

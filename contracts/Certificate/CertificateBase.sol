@@ -7,6 +7,7 @@ contract CertificateBase {
     mapping(address => uint256) internal _checkCount;
     // signature size is 65 bytes (tightly packed v + r + s), but gets padded to 96 bytes
     uint internal constant SIGNATURE_SIZE = 96;
+    uint internal constant FUNCTION_ID_SIZE = 4; // 4 bytes
 
     event Checked(address sender);
 
@@ -24,14 +25,15 @@ contract CertificateBase {
         _certificateSigners[operator] = authorized;
     }
 
-    function _checkCertificate(bytes memory _data, bytes4 _function) internal view returns(bool) {
+    function _checkCertificate(bytes memory _data) internal view returns(bool) {
         bytes memory sig = _extractBytes(_data, 0, 65);    // signature generated on offchain
         bytes memory expHex = _extractBytes(_data, 65, 4); // expiration timestamp in Hex;
         uint expUnix = _bytesToUint(expHex);               // expiration timestamp in Unix;
 
         // params data, first 4 bytes is functionId
         bytes memory data = _extractBytes(msg.data, 0, (msg.data.length - SIGNATURE_SIZE));
-        bytes32 txHash = _getSignHash(_getPreSignedHash(_function, data, address(this), expUnix, _checkCount[msg.sender]));
+        bytes memory functionId = _extractBytes(msg.data, 0, FUNCTION_ID_SIZE);
+        bytes32 txHash = _getSignHash(_getPreSignedHash(functionId, data, address(this), expUnix, _checkCount[msg.sender]));
         address recovered = _ecrecoverFromSig(txHash, sig);
 
         if(_certificateSigners[recovered]) {
@@ -55,8 +57,8 @@ contract CertificateBase {
     }
 
     function _getPreSignedHash(
-        bytes4 _function, bytes memory _data, address _address, uint _expiration, uint _nonce) internal pure returns(bytes32) {
-        return keccak256(abi.encodePacked(_function, _data, _address, _expiration, _nonce));
+        bytes memory _functionId, bytes memory _data, address _address, uint _expiration, uint _nonce) internal pure returns(bytes32) {
+        return keccak256(abi.encodePacked(_functionId, _data, _address, _expiration, _nonce));
     }
 
     function _getSignHash(bytes32 _hash) internal pure returns (bytes32)

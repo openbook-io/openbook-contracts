@@ -7,9 +7,9 @@ contract CertificateController is CertificateBase {
     /**
      * @dev Modifier to protect methods with certificate control
      */
-    modifier isValidCertificate(bytes memory data, bytes4 _functionId) {
+    modifier isValidCertificate(bytes memory data) {
         require(_certificateSigners[msg.sender]
-            || _checkCertificate(data, _functionId), "Transfer Blocked - Sender lockup period not ended");
+            || _checkCertificate(data), "Transfer Blocked - Sender lockup period not ended");
 
         _checkCount[msg.sender] += 1; // Increment sender check count
 

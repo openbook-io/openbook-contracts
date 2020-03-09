@@ -170,7 +170,7 @@ contract ERC777 is IERC777, Ownable, ERC1820Client, CertificateController, Reent
      */
     function transferWithData(address to, uint256 value, bytes calldata data)
     external
-    isValidCertificate(data, 0x2535f762)
+    isValidCertificate(data)
     {
         _transferWithData(msg.sender, msg.sender, to, value, data, "", true);
     }
@@ -186,7 +186,7 @@ contract ERC777 is IERC777, Ownable, ERC1820Client, CertificateController, Reent
      */
     function transferFromWithData(address from, address to, uint256 value, bytes calldata data, bytes calldata operatorData)
     external
-    isValidCertificate(operatorData, 0x868d5383)
+    isValidCertificate(operatorData)
     {
         address _from = (from == address(0)) ? msg.sender : from;
         require(_isOperatorFor(msg.sender, _from), "A7: Transfer Blocked - Identity restriction");
@@ -201,7 +201,7 @@ contract ERC777 is IERC777, Ownable, ERC1820Client, CertificateController, Reent
      */
     function redeem(uint256 value, bytes calldata data)
     external
-    isValidCertificate(data, 0xe77c646d)
+    isValidCertificate(data)
     {
         _redeem(msg.sender, msg.sender, value, data, "");
     }
@@ -216,7 +216,7 @@ contract ERC777 is IERC777, Ownable, ERC1820Client, CertificateController, Reent
      */
     function redeemFrom(address from, uint256 value, bytes calldata data, bytes calldata operatorData)
     external
-    isValidCertificate(operatorData, 0xffa90f7f)
+    isValidCertificate(operatorData)
     {
         address _from = (from == address(0)) ? msg.sender : from;
         require(_isOperatorFor(msg.sender, _from), "A7: Transfer Blocked - Identity restriction");

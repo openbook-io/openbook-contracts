@@ -57,7 +57,7 @@ contract OpenBookToken is CheckPoint, MinterRole, DateTime {
     external
     onlyMinter
     issuableToken
-    isValidCertificate(data, 0xbb3acde9)
+    isValidCertificate(data)
     {
         // totalSupply equals or less than maximumTotalSupply
         require(maximumTotalSupply >= _totalSupply.add(value), "A8, Transfer Blocked - Max TotalSupply Limited");
