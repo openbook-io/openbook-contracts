@@ -59,7 +59,7 @@ export const assertBurnEvent = (
   i++;
 
   assert.equal(_logs[i].event, 'Transfer');
-  assert.equal(_logs[i].args.from, _operator);
+  assert.equal(_logs[i].args.from, _from);
   assert.equal(_logs[i].args.to, ZERO_ADDRESS);
   assert.equal(_logs[i].args.value, _amount);
 };

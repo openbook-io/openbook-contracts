@@ -11,7 +11,7 @@ import {
 const owner                             = '0x91620735349a0B25750facc8e3354c9f02B1518B';
 const unknown                           = '0xFE5bb18b84bf396edFd2Bdbba5372678AF57a977';
 
-const tokenHolder                       = '0x91620735349a0B25750facc8e3354c9f02B1518B';
+const tokenHolder                       = '0x8925C7066da2E518a65045A60556D6A63E6628fa';
 const recipient                         = '0x076a40A4468d5C957E4F71aDE543a471A2Efd6DA';
 const operator                          = '0xEfc12c6C3bDE4764953b7cC3CC2AB8a5c71BEF19';
 
@@ -25,6 +25,7 @@ const CERTIFICATE_SIGNER_ALTERNATIVE2   = '0xEfc12c6C3bDE4764953b7cC3CC2AB8a5c71
 
 const ZERO_ADDRESS                      = '0x0000000000000000000000000000000000000000';
 const issuanceAmount                    = 1000;
+const initialSupply                     = 2000000;
 
 const VALID_CERTIFICATE                 = '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
 const documentName                      = "0x4f70656e426f6f6b546f6b656e00000000000000000000000000000000000000";
@@ -273,14 +274,14 @@ contract('ERC1400 Compatible', function () {
                 it('issues the requested amount', async function () {
                     await this.token.issue(tokenHolder, issuanceAmount, VALID_CERTIFICATE, {from: owner});
 
-                    await assertTotalSupply(this.token, issuanceAmount);
+                    await assertTotalSupply(this.token, issuanceAmount + initialSupply);
                     await assertBalance(this.token, tokenHolder, issuanceAmount);
                 });
                 it('issues twice the requested amount', async function () {
                     await this.token.issue(tokenHolder, issuanceAmount, VALID_CERTIFICATE, {from: owner});
                     await this.token.issue(tokenHolder, issuanceAmount, VALID_CERTIFICATE, {from: owner});
 
-                    await assertTotalSupply(this.token, 2 * issuanceAmount);
+                    await assertTotalSupply(this.token, 2 * issuanceAmount + initialSupply);
                     await assertBalance(this.token, tokenHolder,  2 * issuanceAmount);
                 });
                 it('emits a issued event', async function () {
@@ -335,8 +336,8 @@ contract('ERC1400 Compatible', function () {
             it('redeems the requested amount', async function () {
                 await this.token.redeem(redeemAmount, VALID_CERTIFICATE, {from: controller});
 
-                await assertTotalSupply(this.token, issuanceAmount - redeemAmount);
-                await assertBalance(this.token, controller, issuanceAmount - redeemAmount);
+                await assertTotalSupply(this.token, issuanceAmount - redeemAmount + initialSupply);
+                await assertBalance(this.token, controller, issuanceAmount - redeemAmount + initialSupply);
             });
             it('emits a redeemed event', async function () {
                 const {logs} = await this.token.redeem(redeemAmount, VALID_CERTIFICATE, {from: controller});
@@ -365,7 +366,7 @@ contract('ERC1400 Compatible', function () {
                     await this.token.authorizeOperator(controller, {from: tokenHolder});
                     await this.token.redeemFrom(tokenHolder, redeemAmount, ZERO_BYTE, VALID_CERTIFICATE, {from: controller});
 
-                    await assertTotalSupply(this.token, issuanceAmount - redeemAmount);
+                    await assertTotalSupply(this.token, issuanceAmount - redeemAmount + initialSupply);
                     await assertBalance(this.token, tokenHolder, issuanceAmount - redeemAmount);
                 });
                 it('emits a redeemFrom', async function () {
@@ -391,7 +392,7 @@ contract('ERC1400 Compatible', function () {
                 await this.token.authorizeOperator(controller, {from: tokenHolder});
                 await this.token.redeemFrom(tokenHolder, redeemAmount, ZERO_BYTE, VALID_CERTIFICATE, {from: controller});
 
-                await assertTotalSupply(this.token, issuanceAmount - redeemAmount);
+                await assertTotalSupply(this.token, issuanceAmount - redeemAmount + initialSupply);
                 await assertBalance(this.token, tokenHolder, issuanceAmount - redeemAmount);
             });
         });
@@ -416,12 +417,12 @@ contract('ERC1400 Compatible', function () {
 
         describe('when the sender has enough balance', function () {
             it('transfers the requested amount', async function () {
-                await assertBalance(this.token, controller, issuanceAmount);
+                await assertBalance(this.token, controller, issuanceAmount + initialSupply);
                 await assertBalance(this.token, recipient, 0);
                 await this.token.transferWithData(recipient, transferAmount, VALID_CERTIFICATE, {from: controller});
                 await this.token.transferWithData(recipient, 0, VALID_CERTIFICATE, {from: controller});
 
-                await assertBalance(this.token, controller, issuanceAmount - transferAmount);
+                await assertBalance(this.token, controller, issuanceAmount - transferAmount + initialSupply);
                 await assertBalance(this.token, recipient,  transferAmount);
             });
             it('emits a transferWithData event', async function () {
@@ -434,7 +435,7 @@ contract('ERC1400 Compatible', function () {
         });
         describe('when the sender does not have enough balance', function () {
             it('reverts', async function () {
-                await shouldFail.reverting(this.token.transferWithData(recipient, transferAmount + issuanceAmount, VALID_CERTIFICATE, {from: controller}));
+                await shouldFail.reverting(this.token.transferWithData(recipient, transferAmount + issuanceAmount + initialSupply, VALID_CERTIFICATE, {from: controller}));
             });
         });
     });

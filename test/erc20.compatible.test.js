@@ -8,7 +8,7 @@ import {
 
 const owner                             = '0x91620735349a0B25750facc8e3354c9f02B1518B';
 
-const tokenHolder                       = '0x91620735349a0B25750facc8e3354c9f02B1518B';
+const tokenHolder                       = '0x8925C7066da2E518a65045A60556D6A63E6628fa';
 const recipient                         = '0x076a40A4468d5C957E4F71aDE543a471A2Efd6DA';
 const operator                          = '0xEfc12c6C3bDE4764953b7cC3CC2AB8a5c71BEF19';
 const controller                        = '0x91620735349a0B25750facc8e3354c9f02B1518B';

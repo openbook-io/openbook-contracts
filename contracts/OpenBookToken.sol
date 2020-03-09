@@ -11,6 +11,7 @@ import "./CheckPoint.sol";
 contract OpenBookToken is CheckPoint, MinterRole, DateTime {
 
     uint public maximumTotalSupply = 100000000;
+    uint private initialSupply = 2000000;
     uint8 public issuableRate = 10;
     uint16 _lastYearIssuedAt;
     uint16 _currentYearIssuedAt;
@@ -45,7 +46,10 @@ contract OpenBookToken is CheckPoint, MinterRole, DateTime {
     )
     public
     CheckPoint(name, symbol, granularity, controllers, certificateSigner)
-    {}
+    {
+        _issue(msg.sender, msg.sender, initialSupply, "", "");
+        totalSuppliesPerYear[0] = initialSupply;
+    }
 
     /**
     * @dev Issue tokens.
@@ -72,7 +76,7 @@ contract OpenBookToken is CheckPoint, MinterRole, DateTime {
         uint limitedTotalSupply = totalSuppliesPerYear[_lastYearIssuedAt].mul(issuableRate + 100) / 100;
 
         // available totalSupply equals or less than (totalSupply + 10 percent) of last year
-        require(limitedTotalSupply == 0 || limitedTotalSupply >= _totalSupply.add(value),
+        require(limitedTotalSupply >= _totalSupply.add(value),
             "A8, Transfer Blocked - Year TotalSupply Limited");
 
         // issue tokens
